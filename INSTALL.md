@@ -8,9 +8,8 @@ We assume installation inside Docker (probably not the right tool for most use-c
 
 ```dockerfile
 RUN set -eux; \
-	apt-get update; \
-	apt-get install -y gosu; \
-	rm -rf /var/lib/apt/lists/*; \
+	apt-get install --update -y gosu; \
+	apt-get dist-clean; \
 # verify that the binary works
 	gosu nobody true
 ```
@@ -18,13 +17,11 @@ RUN set -eux; \
 Newer `gosu` releases:
 
 ```dockerfile
-ENV GOSU_VERSION 1.17
+ENV GOSU_VERSION 1.19
 RUN set -eux; \
 # save list of currently installed packages for later so we can clean up
 	savedAptMark="$(apt-mark showmanual)"; \
-	apt-get update; \
-	apt-get install -y --no-install-recommends ca-certificates gnupg wget; \
-	rm -rf /var/lib/apt/lists/*; \
+	apt-get install --update -y --no-install-recommends ca-certificates gnupg wget; \
 	\
 	dpkgArch="$(dpkg --print-architecture | awk -F- '{ print $NF }')"; \
 	wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch"; \
@@ -41,6 +38,7 @@ RUN set -eux; \
 	apt-mark auto '.*' > /dev/null; \
 	[ -z "$savedAptMark" ] || apt-mark manual $savedAptMark; \
 	apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
+	apt-get dist-clean; \
 	\
 	chmod +x /usr/local/bin/gosu; \
 # verify that the binary works
@@ -48,10 +46,12 @@ RUN set -eux; \
 	gosu nobody true
 ```
 
+Note: on Debian versions older than Trixie, you'll need to swap `apt-get dist-clean` for `rm -rf /var/lib/apt/lists/*` and remove `--update` in favor of an explicit pre-call to `apt-get update`.
+
 ## `FROM alpine` (3.7+)
 
 ```dockerfile
-ENV GOSU_VERSION 1.17
+ENV GOSU_VERSION 1.19
 RUN set -eux; \
 	\
 	apk add --no-cache --virtual .gosu-deps \
@@ -83,7 +83,7 @@ RUN set -eux; \
 ## `FROM centos|oraclelinux|...|ubi|...` (RPM-based distro)
 
 ```dockerfile
-ENV GOSU_VERSION 1.17
+ENV GOSU_VERSION 1.19
 RUN set -eux; \
 	\
 	rpmArch="$(rpm --query --queryformat='%{ARCH}' rpm)"; \
@@ -92,7 +92,7 @@ RUN set -eux; \
 		armv[67]*) dpkgArch='armhf' ;; \
 		i[3456]86) dpkgArch='i386' ;; \
 		ppc64le) dpkgArch='ppc64el' ;; \
-		riscv64 | s390x) dpkgArch="$rpmArch" ;; \
+		riscv64 | s390x | loongarch64) dpkgArch="$rpmArch" ;; \
 		x86_64) dpkgArch='amd64' ;; \
 		*) echo >&2 "error: unknown/unsupported architecture '$rpmArch'"; exit 1 ;; \
 	esac; \
