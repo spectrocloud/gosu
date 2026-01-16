@@ -36,11 +36,11 @@ Usage: ` + self + ` user-spec command [args]
 func exit(code int, w *os.File, ss ...string) {
 	for i, s := range ss {
 		if i > 0 {
-			w.Write([]byte{' '})
+			_, _ = w.Write([]byte{' '})
 		}
-		w.Write([]byte(s))
+		_, _ = w.Write([]byte(s))
 	}
-	w.Write([]byte{'\n'})
+	_, _ = w.Write([]byte{'\n'})
 	os.Exit(code)
 }
 
@@ -81,7 +81,8 @@ func main() {
 		exit(1, os.Stderr, "error:", err.Error())
 	}
 
-	if err = syscall.Exec(name, os.Args[2:], os.Environ()); err != nil {
+	// G204: This is intentional - gosu's core purpose is to execute user-provided commands (like sudo/su)
+	if err = syscall.Exec(name, os.Args[2:], os.Environ()); err != nil { //nolint:gosec
 		exit(1, os.Stderr, "error: exec failed:", err.Error())
 	}
 }
