@@ -1,4 +1,4 @@
-FROM golang:1.24.9-trixie
+FROM golang:1.26.2-trixie
 
 RUN set -eux; \
 	apt-get install --update -y --no-install-recommends \
@@ -9,7 +9,7 @@ RUN set -eux; \
 
 # https://github.com/tianon/fake-git
 # https://github.com/tianon/fake-git/commits/HEAD
-ENV FAKEGIT_COMMIT dc6774bbecc1f72de44d02bfd4385a4e6f45f807
+ENV FAKEGIT_COMMIT 4639d58ce5f6488e448a019acc2b5ffc55d0925f
 RUN set -eux; \
 	git init /opt/fake-git; \
 	git -C /opt/fake-git fetch --depth 1 https://github.com/tianon/fake-git.git "$FAKEGIT_COMMIT:"; \
