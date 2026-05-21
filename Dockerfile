@@ -1,11 +1,12 @@
-FROM golang:1.26.2-trixie
+FROM us-central1-docker.pkg.dev/palette-images-dev/hardened-images/builder/golang:1.26.3-bookworm
 
 RUN set -eux; \
-	apt-get install --update -y --no-install-recommends \
+	apt-get update; \
+	apt-get install -y --no-install-recommends \
 		arch-test \
 		file \
 	; \
-	apt-get dist-clean
+	rm -rf /var/lib/apt/lists/*
 
 # https://github.com/tianon/fake-git
 # https://github.com/tianon/fake-git/commits/HEAD
