@@ -1,4 +1,4 @@
-FROM us-central1-docker.pkg.dev/palette-images-dev/hardened-images/builder/golang:1.26.4-bookworm
+FROM us-central1-docker.pkg.dev/palette-images-dev/hardened-images/builder/golang:1.26.5-bookworm
 
 RUN set -eux; \
 	apt-get update; \
